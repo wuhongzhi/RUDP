@@ -27,10 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
-
-
 
 /*
  *  NUL Segment
@@ -45,19 +42,15 @@ package net.rudp.impl;
  *  +---------------+---------------+
  *
  */
-public class NULSegment extends Segment
-{
-    protected NULSegment()
-    {
-    }
+public class NULSegment extends Segment {
+	protected NULSegment() {
+	}
 
-    public NULSegment(int seqn)
-    {
-        init(NUL_FLAG, seqn, RUDP_HEADER_LEN);
-    }
+	public NULSegment(int seqn) {
+		init(NUL_FLAG, seqn, RUDP_HEADER_LEN);
+	}
 
-    public String type()
-    {
-        return "NUL";
-    }
+	public String type() {
+		return "NUL";
+	}
 }

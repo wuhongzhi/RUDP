@@ -27,7 +27,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
 
 /*
@@ -45,19 +44,15 @@ package net.rudp.impl;
  *  +---------------+---------------+
  *
  */
-public class CLZSegment extends Segment
-{
-    protected CLZSegment()
-    {
-    }
+public class CLZSegment extends Segment {
+	protected CLZSegment() {
+	}
 
-    public CLZSegment(int seqn)
-    {
-        init(CLZ_FLAG, seqn, RUDP_HEADER_LEN);
-    }
+	public CLZSegment(int seqn) {
+		init(CLZ_FLAG, seqn, RUDP_HEADER_LEN);
+	}
 
-    public String type()
-    {
-        return "CLZ";
-    }
+	public String type() {
+		return "CLZ";
+	}
 }

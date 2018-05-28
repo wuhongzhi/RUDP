@@ -27,10 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
-
-
 
 /*
  *  ACK Segment
@@ -45,20 +42,16 @@ package net.rudp.impl;
  *  +---------------+---------------+
  *
  */
-public class ACKSegment extends Segment
-{
-    protected ACKSegment()
-    {
-    }
+public class ACKSegment extends Segment {
+	protected ACKSegment() {
+	}
 
-    public ACKSegment(int seqn, int ackn)
-    {
-        init(ACK_FLAG, seqn, RUDP_HEADER_LEN);
-        setAck(ackn);
-    }
+	public ACKSegment(int seqn, int ackn) {
+		init(ACK_FLAG, seqn, RUDP_HEADER_LEN);
+		setAck(ackn);
+	}
 
-    public String type()
-    {
-        return "ACK";
-    }
+	public String type() {
+		return "ACK";
+	}
 }

@@ -27,7 +27,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
 
 /*
@@ -45,19 +44,15 @@ package net.rudp.impl;
  *  +---------------+---------------+
  *
  */
-public class FINSegment extends Segment
-{
-    protected FINSegment()
-    {
-    }
+public class FINSegment extends Segment {
+	protected FINSegment() {
+	}
 
-    public FINSegment(int seqn)
-    {
-        init(FIN_FLAG, seqn, RUDP_HEADER_LEN);
-    }
+	public FINSegment(int seqn) {
+		init(FIN_FLAG, seqn, RUDP_HEADER_LEN);
+	}
 
-    public String type()
-    {
-        return "FIN";
-    }
+	public String type() {
+		return "FIN";
+	}
 }

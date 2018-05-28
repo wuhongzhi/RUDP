@@ -27,7 +27,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp;
 
 import java.io.IOException;
@@ -140,7 +139,6 @@ public class ReliableServerSocket extends ServerSocket {
 		if (sock == null) {
 			throw new NullPointerException("sock");
 		}
-
 		_serverSock = sock;
 		_backlogSize = (backlog <= 0) ? DEFAULT_BACKLOG_SIZE : backlog;
 		_backlog = new ArrayList<>(_backlogSize);
@@ -148,7 +146,6 @@ public class ReliableServerSocket extends ServerSocket {
 		_stateListener = new StateListener();
 		_timeout = 0;
 		_closed = false;
-
 		new ReceiverThread().start();
 	}
 
@@ -156,7 +153,6 @@ public class ReliableServerSocket extends ServerSocket {
 		if (isClosed()) {
 			throw new SocketException("Socket is closed");
 		}
-
 		synchronized (_backlog) {
 			while (_backlog.isEmpty()) {
 				try {
@@ -169,16 +165,13 @@ public class ReliableServerSocket extends ServerSocket {
 							throw new SocketTimeoutException();
 						}
 					}
-
 				} catch (InterruptedException xcp) {
 					xcp.printStackTrace();
 				}
-
 				if (isClosed()) {
 					throw new IOException();
 				}
 			}
-
 			return _backlog.remove(0);
 		}
 	}
@@ -191,7 +184,6 @@ public class ReliableServerSocket extends ServerSocket {
 		if (isClosed()) {
 			throw new SocketException("Socket is closed");
 		}
-
 		_serverSock.bind(endpoint);
 	}
 
@@ -199,13 +191,11 @@ public class ReliableServerSocket extends ServerSocket {
 		if (isClosed()) {
 			return;
 		}
-
 		_closed = true;
 		synchronized (_backlog) {
 			_backlog.clear();
 			_backlog.notify();
 		}
-
 		if (_clientSockTable.isEmpty()) {
 			_serverSock.close();
 		}
@@ -235,7 +225,6 @@ public class ReliableServerSocket extends ServerSocket {
 		if (timeout < 0) {
 			throw new IllegalArgumentException("timeout < 0");
 		}
-
 		_timeout = timeout;
 	}
 
@@ -253,7 +242,6 @@ public class ReliableServerSocket extends ServerSocket {
 	private ReliableClientSocket addClientSocket(SocketAddress endpoint) {
 		synchronized (_clientSockTable) {
 			ReliableClientSocket sock = (ReliableClientSocket) _clientSockTable.get(endpoint);
-
 			if (sock == null) {
 				try {
 					sock = new ReliableClientSocket(_serverSock, endpoint);
@@ -263,7 +251,6 @@ public class ReliableServerSocket extends ServerSocket {
 					xcp.printStackTrace();
 				}
 			}
-
 			return sock;
 		}
 	}
@@ -278,13 +265,11 @@ public class ReliableServerSocket extends ServerSocket {
 	private ReliableClientSocket removeClientSocket(SocketAddress endpoint) {
 		synchronized (_clientSockTable) {
 			ReliableClientSocket sock = (ReliableClientSocket) _clientSockTable.remove(endpoint);
-
 			if (_clientSockTable.isEmpty()) {
 				if (isClosed()) {
 					_serverSock.close();
 				}
 			}
-
 			return sock;
 		}
 	}
@@ -293,19 +278,15 @@ public class ReliableServerSocket extends ServerSocket {
 	private int _timeout;
 	private int _backlogSize;
 	private boolean _closed;
-
 	/*
 	 * The listen backlog queue.
 	 */
 	private ArrayList<ReliableSocket> _backlog;
-
 	/*
 	 * A table of active opened client sockets.
 	 */
 	private HashMap<SocketAddress, ReliableClientSocket> _clientSockTable;
-
 	private ReliableSocketStateListener _stateListener;
-
 	private static final int DEFAULT_BACKLOG_SIZE = 50;
 
 	private class ReceiverThread extends Thread {
@@ -316,18 +297,14 @@ public class ReliableServerSocket extends ServerSocket {
 
 		public void run() {
 			byte[] buffer = new byte[65535];
-
 			while (true) {
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				ReliableClientSocket sock = null;
-
 				try {
 					_serverSock.receive(packet);
 					SocketAddress endpoint = packet.getSocketAddress();
 					Segment s = Segment.parse(packet.getData(), 0, packet.getLength());
-
 					synchronized (_clientSockTable) {
-
 						if (!isClosed()) {
 							if (s instanceof SYNSegment) {
 								if (!_clientSockTable.containsKey(endpoint)) {
@@ -335,10 +312,8 @@ public class ReliableServerSocket extends ServerSocket {
 								}
 							}
 						}
-
 						sock = (ReliableClientSocket) _clientSockTable.get(endpoint);
 					}
-
 					if (sock != null) {
 						sock.segmentReceived(s);
 					}
@@ -372,8 +347,7 @@ public class ReliableServerSocket extends ServerSocket {
 						xcp.printStackTrace();
 					}
 				}
-
-				return (Segment) _queue.remove(0);
+				return _queue.remove(0);
 			}
 		}
 
@@ -410,7 +384,6 @@ public class ReliableServerSocket extends ServerSocket {
 							xcp.printStackTrace();
 						}
 					}
-
 					_backlog.add(sock);
 					_backlog.notify();
 				}

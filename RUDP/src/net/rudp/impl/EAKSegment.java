@@ -27,10 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
-
-
 
 /*
  *  EACK Segment
@@ -51,48 +48,39 @@ package net.rudp.impl;
  *  +---------------+---------------+
  *
  */
-public class EAKSegment extends ACKSegment
-{
-    protected EAKSegment()
-    {
-    }
+public class EAKSegment extends ACKSegment {
+	protected EAKSegment() {
+	}
 
-    public EAKSegment(int seqn, int ackn,  int[] acks)
-    {
-        init(EAK_FLAG, seqn, RUDP_HEADER_LEN + acks.length);
-        setAck(ackn);
-        _acks = acks;
-    }
+	public EAKSegment(int seqn, int ackn, int[] acks) {
+		init(EAK_FLAG, seqn, RUDP_HEADER_LEN + acks.length);
+		setAck(ackn);
+		_acks = acks;
+	}
 
-    public String type()
-    {
-        return "EAK";
-    }
+	public String type() {
+		return "EAK";
+	}
 
-    public int[] getACKs()
-    {
-        return _acks;
-    }
+	public int[] getACKs() {
+		return _acks;
+	}
 
-    public byte[] getBytes()
-    {
-        byte[] buffer = super.getBytes();
+	public byte[] getBytes() {
+		byte[] buffer = super.getBytes();
+		for (int i = 0; i < _acks.length; i++) {
+			buffer[4 + i] = (byte) (_acks[i] & 0xFF);
+		}
+		return buffer;
+	}
 
-        for (int i = 0; i < _acks.length; i++) {
-            buffer[4+i] = (byte) (_acks[i] & 0xFF);
-        }
+	protected void parseBytes(byte[] buffer, int off, int len) {
+		super.parseBytes(buffer, off, len);
+		_acks = new int[len - RUDP_HEADER_LEN];
+		for (int i = 0; i < _acks.length; i++) {
+			_acks[i] = (buffer[off + 4 + i] & 0xFF);
+		}
+	}
 
-        return buffer;
-    }
-
-    protected void parseBytes(byte[] buffer, int off, int len)
-    {
-        super.parseBytes(buffer, off, len);
-        _acks = new int[len - RUDP_HEADER_LEN];
-        for (int i = 0; i < _acks.length; i++) {
-            _acks[i] = (buffer[off + 4 + i] & 0xFF);
-        }
-    }
-
-    private int[] _acks;
+	private int[] _acks;
 }

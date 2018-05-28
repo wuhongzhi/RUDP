@@ -27,7 +27,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
 
 /*
@@ -45,19 +44,15 @@ package net.rudp.impl;
  *  +---------------+---------------+
  *
  */
-public class RSTSegment extends Segment
-{
-    protected RSTSegment()
-    {
-    }
+public class RSTSegment extends Segment {
+	protected RSTSegment() {
+	}
 
-    public RSTSegment(int seqn)
-    {
-        init(RST_FLAG, seqn, RUDP_HEADER_LEN);
-    }
+	public RSTSegment(int seqn) {
+		init(RST_FLAG, seqn, RUDP_HEADER_LEN);
+	}
 
-    public String type()
-    {
-        return "RST";
-    }
+	public String type() {
+		return "RST";
+	}
 }

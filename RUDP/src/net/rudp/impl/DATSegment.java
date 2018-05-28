@@ -27,9 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 package net.rudp.impl;
-
 
 /*
  *  Data Segment
@@ -46,48 +44,40 @@ package net.rudp.impl;
  *  +-------------------------------+
  *
  */
-public class DATSegment extends Segment
-{
-    protected DATSegment()
-    {
-    }
+public class DATSegment extends Segment {
+	protected DATSegment() {
+	}
 
-    public DATSegment(int seqn, int ackn, byte[] b, int off, int len)
-    {
-        init(ACK_FLAG, seqn, RUDP_HEADER_LEN);
-        setAck(ackn);
-        _data = new byte[len];
-        System.arraycopy(b, off, _data, 0, len);
-    }
+	public DATSegment(int seqn, int ackn, byte[] b, int off, int len) {
+		init(ACK_FLAG, seqn, RUDP_HEADER_LEN);
+		setAck(ackn);
+		_data = new byte[len];
+		System.arraycopy(b, off, _data, 0, len);
+	}
 
-    public int length()
-    {
-        return _data.length + super.length();
-    }
+	public int length() {
+		return _data.length + super.length();
+	}
 
-    public String type()
-    {
-        return "DAT";
-    }
+	public String type() {
+		return "DAT";
+	}
 
-    public byte[] getData()
-    {
-        return _data;
-    }
+	public byte[] getData() {
+		return _data;
+	}
 
-    public byte[] getBytes()
-    {
-        byte[] buffer = super.getBytes();
-        System.arraycopy(_data, 0, buffer, RUDP_HEADER_LEN, _data.length);
-        return buffer;
-    }
+	public byte[] getBytes() {
+		byte[] buffer = super.getBytes();
+		System.arraycopy(_data, 0, buffer, RUDP_HEADER_LEN, _data.length);
+		return buffer;
+	}
 
-    public void parseBytes(byte[] buffer, int off, int len)
-    {
-        super.parseBytes(buffer, off, len);
-        _data = new byte[len - RUDP_HEADER_LEN];
-        System.arraycopy(buffer, off+RUDP_HEADER_LEN, _data, 0, _data.length);
-    }
+	public void parseBytes(byte[] buffer, int off, int len) {
+		super.parseBytes(buffer, off, len);
+		_data = new byte[len - RUDP_HEADER_LEN];
+		System.arraycopy(buffer, off + RUDP_HEADER_LEN, _data, 0, _data.length);
+	}
 
-    private byte[] _data;
+	private byte[] _data;
 }
