@@ -42,6 +42,7 @@ public abstract class Segment
     public static final byte NUL_FLAG = (byte) 0x08;
     public static final byte CHK_FLAG = (byte) 0x04;
     public static final byte FIN_FLAG = (byte) 0x02;
+    public static final byte CLZ_FLAG = (byte) 0x01;
 
 
     protected Segment()
@@ -139,6 +140,9 @@ public abstract class Segment
         }
         else if ((flags & RST_FLAG) != 0) {
             segment = new RSTSegment();
+        }
+        else if ((flags & CLZ_FLAG) != 0) {
+            segment = new CLZSegment();
         }
         else if ((flags & FIN_FLAG) != 0) {
             segment = new FINSegment();
