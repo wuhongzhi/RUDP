@@ -867,8 +867,9 @@ public class ReliableSocket extends Socket {
 			if (DEBUG) {
 				log("recv " + s);
 			}
-			if (s instanceof DATSegment || s instanceof NULSegment || s instanceof RSTSegment || s instanceof FINSegment
-					|| s instanceof SYNSegment) {
+			if (s instanceof DATSegment || s instanceof NULSegment 
+					|| s instanceof RSTSegment || s instanceof CLZSegment 
+					|| s instanceof FINSegment || s instanceof SYNSegment) {
 				_counters.incCumulativeAckCounter();
 			}
 			if (_keepAlive) {
@@ -1383,7 +1384,8 @@ public class ReliableSocket extends Socket {
 				Segment s = it.next();
 				if (compareSequenceNumbers(s.seq(), nextSequenceNumber(_counters.getLastInSequence())) == 0) {
 					_counters.setLastInSequence(s.seq());
-					if (s instanceof DATSegment || s instanceof RSTSegment || s instanceof FINSegment) {
+					if (s instanceof DATSegment || s instanceof RSTSegment 
+							|| s instanceof CLZSegment || s instanceof FINSegment) {
 						_inSeqRecvQueue.add(s);
 					}
 					it.remove();
