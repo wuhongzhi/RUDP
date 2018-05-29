@@ -1403,7 +1403,7 @@ public class ReliableSocket extends Socket {
 	 */
 	protected void sendSegmentImpl(Segment s) throws IOException {
 		try {
-			DatagramPacket packet = new DatagramPacket(s.getBytes(), s.length(), _endpoint);
+			DatagramPacket packet = new DatagramPacket(s.withChecksum(), s.length(), _endpoint);
 			_sock.send(packet);
 		} catch (IOException xcp) {
 			if (!isClosed()) {
@@ -1423,7 +1423,7 @@ public class ReliableSocket extends Socket {
 		try {
 			DatagramPacket packet = new DatagramPacket(_recvbuffer, _recvbuffer.length);
 			_sock.receive(packet);
-			return Segment.parse(packet.getData(), 0, packet.getLength());
+			return Segment.parse(packet.getData(), packet.getOffset(), packet.getLength());
 		} catch (IOException ioXcp) {
 			if (!isClosed()) {
 				ioXcp.printStackTrace();

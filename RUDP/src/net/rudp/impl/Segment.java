@@ -29,9 +29,9 @@
  */
 package net.rudp.impl;
 
+import java.nio.ByteBuffer;
+
 public abstract class Segment {
-	public static final int RUDP_VERSION = 1;
-	public static final int RUDP_HEADER_LEN = 6;
 	public static final byte SYN_FLAG = (byte) 0x80;
 	public static final byte ACK_FLAG = (byte) 0x40;
 	public static final byte EAK_FLAG = (byte) 0x20;
@@ -40,59 +40,8 @@ public abstract class Segment {
 	public static final byte CHK_FLAG = (byte) 0x04;
 	public static final byte FIN_FLAG = (byte) 0x02;
 	public static final byte CLZ_FLAG = (byte) 0x01;
-
-	protected Segment() {
-		_nretx = 0;
-		_ackn = -1;
-	}
-
-	public abstract String type();
-
-	public int flags() {
-		return _flags;
-	}
-
-	public int seq() {
-		return _seqn;
-	}
-
-	public int length() {
-		return _hlen;
-	}
-
-	public void setAck(int ackn) {
-		_flags = _flags | ACK_FLAG;
-		_ackn = ackn;
-	}
-
-	public int getAck() {
-		if ((_flags & ACK_FLAG) == ACK_FLAG) {
-			return _ackn;
-		}
-		return -1;
-	}
-
-	public int getRetxCounter() {
-		return _nretx;
-	}
-
-	public void setRetxCounter(int n) {
-		_nretx = n;
-	}
-
-	public byte[] getBytes() {
-		byte[] buffer = new byte[length()];
-		buffer[0] = (byte) (_flags & 0xFF);
-		buffer[1] = (byte) (_hlen & 0xFF);
-		buffer[2] = (byte) (_seqn & 0xFF);
-		buffer[3] = (byte) (_ackn & 0xFF);
-		return buffer;
-	}
-
-	public String toString() {
-		return type() + " [" + " SEQ = " + seq() + ", ACK = " + ((getAck() >= 0) ? "" + getAck() : "N/A") + ", LEN = "
-				+ length() + " ]";
-	}
+	public static final int RUDP_HEADER_LEN = 6;
+	public static final int RUDP_VERSION = 1;
 
 	public static Segment parse(byte[] bytes) {
 		return Segment.parse(bytes, 0, bytes.length);
@@ -133,15 +82,75 @@ public abstract class Segment {
 		return segment;
 	}
 
+	private int _ackn; /* Acknowledgment number field */
+	private int _flags; /* Control flags field */
+	private int _hlen; /* Header length field */
+	private int _nretx; /* Retransmission counter */
+	private int _seqn; /* Sequence number field */
+
+	protected Segment() {
+		_nretx = 0;
+		_ackn = -1;
+	}
+
+	public byte[] withChecksum() {
+		ByteBuffer buffer = ByteBuffer.wrap(getBytes());
+		buffer.putShort(_hlen - 2, (short)0);
+		long checksum = checksum(buffer.array(), 0, buffer.limit());
+		buffer.putShort(_hlen - 2, (short)checksum);
+		return buffer.array();
+	}
+
+	long checksum(byte[] buf, int off, int length) {
+		int count = (_flags & CHK_FLAG) != 0 ? length : _hlen;
+		int i = off;
+		long sum = 0;
+		while (count > 0) {
+			sum += (buf[i++] & 0xFF) << 8;
+			if ((--count) == 0) break;
+			sum += (buf[i++] & 0xFF);
+			--count;
+		}
+		return (~((sum & 0xFFFF) + (sum >> 16))) & 0xFFFF;
+	}
+
+	public int flags() {
+		return _flags;
+	}
+
+	public int getAck() {
+		if ((_flags & ACK_FLAG) == ACK_FLAG) {
+			return _ackn;
+		}
+		return -1;
+	}
+
+	public byte[] getBytes() {
+		byte[] buffer = new byte[length()];
+		buffer[0] = (byte) (_flags & 0xFF);
+		buffer[1] = (byte) (_hlen & 0xFF);
+		buffer[2] = (byte) (_seqn & 0xFF);
+		buffer[3] = (byte) (_ackn & 0xFF);
+		return buffer;
+	}
+
+	public int getRetxCounter() {
+		return _nretx;
+	}
+
 	/*
 	 * RUDP Header
 	 *
-	 * 0 1 2 3 4 5 6 7 8 15 +-+-+-+-+-+-+-+-+---------------+ |S|A|E|R|N|C| | |
-	 * Header | |Y|C|A|S|U|H|0|0| Length | |N|K|K|T|L|K| | | |
-	 * +-+-+-+-+-+-+-+-+---------------+ | Sequence # + Ack Number |
-	 * +---------------+---------------+ | Checksum |
+	 * 0 1 2 3 4 5 6 7 8             15 
+	 * +-+-+-+-+-+-+-+-+---------------+ 
+	 * |S|A|E|R|N|C|F|C| Header        | 
+	 * |Y|C|A|S|U|H|I|L| Length        | 
+	 * |N|K|K|T|L|K|N|Z|               |
+	 * +-+-+-+-+-+-+-+-+---------------+ 
+	 * | Sequence # + Ack Number       |
+	 * +---------------+---------------+ 
+	 * | Checksum                      |
 	 * +---------------+---------------+
-	 *
 	 */
 	protected void init(int flags, int seqn, int len) {
 		_flags = flags;
@@ -149,16 +158,38 @@ public abstract class Segment {
 		_hlen = len;
 	}
 
+	public int length() {
+		return _hlen;
+	}
+
 	protected void parseBytes(byte[] buffer, int off, int len) {
 		_flags = (buffer[off] & 0xFF);
 		_hlen = (buffer[off + 1] & 0xFF);
 		_seqn = (buffer[off + 2] & 0xFF);
 		_ackn = (buffer[off + 3] & 0xFF);
+		if (checksum(buffer, off, len) != 0) {
+			throw new IllegalArgumentException("Invalid segment");
+		}
 	}
 
-	private int _flags; /* Control flags field */
-	private int _hlen; /* Header length field */
-	private int _seqn; /* Sequence number field */
-	private int _ackn; /* Acknowledgment number field */
-	private int _nretx; /* Retransmission counter */
+	public int seq() {
+		return _seqn;
+	}
+
+	public void setAck(int ackn) {
+		_flags = _flags | ACK_FLAG;
+		_ackn = ackn;
+	}
+
+	public void setRetxCounter(int n) {
+		_nretx = n;
+	}
+
+	public String toString() {
+		return type() + " [" + " SEQ = " + seq() 
+				+ ", ACK = " + ((getAck() >= 0) ? "" + getAck() : "N/A") + ", LEN = "
+				+ length() + " ]";
+	}
+
+	public abstract String type();
 }

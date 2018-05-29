@@ -303,7 +303,7 @@ public class ReliableServerSocket extends ServerSocket {
 				try {
 					_serverSock.receive(packet);
 					SocketAddress endpoint = packet.getSocketAddress();
-					Segment s = Segment.parse(packet.getData(), 0, packet.getLength());
+					Segment s = Segment.parse(packet.getData(), packet.getOffset(), packet.getLength());
 					synchronized (_clientSockTable) {
 						if (!isClosed()) {
 							if (s instanceof SYNSegment) {
